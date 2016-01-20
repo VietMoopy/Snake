@@ -51,27 +51,27 @@ int DirectionSerpent(direction) // Permet de determiner dans quelle direction l'
   int touche = 0;
   if(ToucheEnAttente()) // Si le joueur a presser une touche 
     {
-    touche = Touche();
-    if(touche== XK_Up && direction != DOWN)
-      {
-      direction = UP;
-      }
-    if(touche == XK_Down && direction != UP)
-      {
-      direction = DOWN;
-      }
-    if(touche == XK_Left && direction != RIGHT)
-      {
-      direction = LEFT;
-      }
-    if(touche == XK_Right && direction != LEFT)
-      {
-      direction = RIGHT;
-      }
-    if(touche == XK_space)
-      {
-	MettrePause();
-      }
+      touche = Touche();
+      if(touche== XK_Up && direction != DOWN)
+	{
+	  direction = UP;
+	}
+      if(touche == XK_Down && direction != UP)
+	{
+	  direction = DOWN;
+	}
+      if(touche == XK_Left && direction != RIGHT)
+	{
+	  direction = LEFT;
+	}
+      if(touche == XK_Right && direction != LEFT)
+	{
+	  direction = RIGHT;
+	}
+      if(touche == XK_space)
+	{
+	  MettrePause();
+	}
     } // Dans le cas où le joueur n'a rien pressé, on renvoit la même valeur que celle donnée en argument
   return direction;
 }
@@ -98,23 +98,23 @@ Coordonnees DeplacerSerpent(int carre,int direction, Coordonnees* serpent, int t
     }
   if(direction == UP)
     {
-    serpent[0].x= serpent[0].x;
-    serpent[0].y= serpent[0].y-1;
+      serpent[0].x= serpent[0].x;
+      serpent[0].y= serpent[0].y-1;
     }
   if(direction == DOWN)
     {
-    serpent[0].x= serpent[0].x;
-    serpent[0].y= serpent[0].y+1;
+      serpent[0].x= serpent[0].x;
+      serpent[0].y= serpent[0].y+1;
     }
   if(direction == LEFT)
     {
-    serpent[0].x= serpent[0].x-1;
-    serpent[0].y= serpent[0].y;
+      serpent[0].x= serpent[0].x-1;
+      serpent[0].y= serpent[0].y;
     }
   if(direction == RIGHT)
     {
-    serpent[0].x= serpent[0].x+1;
-    serpent[0].y= serpent[0].y;
+      serpent[0].x= serpent[0].x+1;
+      serpent[0].y= serpent[0].y;
     }
   return queue;
 }
@@ -124,13 +124,11 @@ void AfficherSerpent(Coordonnees* serpent, int tailleSerpent, int carre, Coordon
   usleep(80000); // Vitesse du serpent
   ChoisirCouleurDessin(CouleurParNom("white"));
   RemplirRectangle(queue.x*carre,queue.y*carre,carre,carre);
-  ChoisirCouleurDessin(CouleurParNom("black"));
-  DessinerRectangle(queue.x*carre,queue.y*carre,carre,carre);
   ChoisirCouleurDessin(CouleurParNom("green"));
   RemplirRectangle(serpent[0].x*carre,serpent[0].y*carre,carre,carre);
   for(i = 1; i < tailleSerpent; i++)
     {
-      ChoisirCouleurDessin(CouleurParNom("black"));
+      ChoisirCouleurDessin(CouleurParNom("grey"));
       RemplirRectangle(serpent[i].x*carre,serpent[i].y*carre,carre,carre);
     }
 }
@@ -146,8 +144,8 @@ int CreerPomme(int carre, Pomme* tabPomme, Obstacles* tabObstacle){ // Affiche u
 	  tabPomme[i].flagP = 1;
 	  for(k = 0; k < NB_OBSTACLE; k++)
 	    {
-	       tabPomme[i].x = (rand() % (MAXGRILLEX - MINGRILLE + 1)) + MINGRILLE;
-	       tabPomme[i].y = (rand() % (MAXGRILLEY - MINGRILLE + 1)) + MINGRILLE;
+	      tabPomme[i].x = (rand() % (MAXGRILLEX - MINGRILLE + 1)) + MINGRILLE;
+	      tabPomme[i].y = (rand() % (MAXGRILLEY - MINGRILLE + 1)) + MINGRILLE;
 	      if((tabPomme[i].x == tabObstacle[k].x && tabPomme[i].y == tabObstacle[k].y) || (tabPomme[i].x == -1 && tabPomme[i].y == -1))
 		{
 		  tabPomme[i].x = (rand() % (MAXGRILLEX - MINGRILLE + 1)) + MINGRILLE; // Permet d'obtenir une valeur aléatoire entre 0 et 60 sachant que la grille est de 60 par 40
@@ -187,12 +185,12 @@ int VerifieManger(int* score,Coordonnees tete,Pomme* tabPomme, int tailleSerpent
   int i;
   for(i = 0; i < NB_OBSTACLE; i++)
     {
-       if (tete.x == tabPomme[i].x && tete.y == tabPomme[i].y)
+      if (tete.x == tabPomme[i].x && tete.y == tabPomme[i].y)
 	{
-	   tabPomme[i].flagP = 0;
-	   tailleSerpent++;
-	   *score = *score+5;
-	   AfficherScore(*score);
+	  tabPomme[i].flagP = 0;
+	  tailleSerpent++;
+	  *score = *score+5;
+	  AfficherScore(*score);
 	}
     }
   return tailleSerpent;
@@ -238,6 +236,11 @@ int VerifieCollisionSerpent(Coordonnees tete, Coordonnees serpent[], int tailleS
   return 0;
 }
 
+void NettoyerEcran(){
+  ChoisirCouleurDessin(CouleurParNom("white"));
+  RemplirRectangle(0,0,NB_PIXEL_X_JEU,NB_PIXEL_Y_JEU);
+}
+  
 
 int main() // Fonction principale
 {
@@ -245,6 +248,7 @@ int main() // Fonction principale
   unsigned long suivant;
   suivant= Microsecondes()+delta;
   int i = 0;
+  int etatJeu = 1;
   int score = 0;
   int direction = 0;
   char seconde = '0';
@@ -254,66 +258,74 @@ int main() // Fonction principale
   int tailleSerpent = 10;
   int flag[5] = {0};
   Coordonnees serpent[20];
-  for (i = 0 ; i < tailleSerpent; i++) // Initialisation du serpent
-    {
-      serpent[i].x = 30;
-      serpent[i].y = 20;
-    }
+
   serpent[tailleSerpent].x = -1; // Pour ne pas voir un carre noir qui apparait en haut a droite de la fenetre
   serpent[tailleSerpent].y = -1;
   Coordonnees queue;
   Pomme tabPomme[NB_POMME] = {};
+
+  Obstacles tabObstacle[NB_OBSTACLE] = {};
+  Coordonnees tete;
+  InitialiserGraphique();
+  CreerFenetre(10,10,NB_PIXEL_X_FENETRE,NB_PIXEL_Y_FENETRE);
+  while(etatJeu){
   for (i = 0 ; i < NB_POMME; i++) // Initialisation du serpent
     {
       tabPomme[i].x = -1;
       tabPomme[i].y = -1;
     }
-  Obstacles tabObstacle[NB_OBSTACLE] = {};
-  Coordonnees tete;
-  
-  InitialiserGraphique();
-  CreerFenetre(10,10,NB_PIXEL_X_FENETRE,NB_PIXEL_Y_FENETRE);
-  DessinerGrille(carre);
-  RemplirRectangle(0,NB_PIXEL_Y_JEU,1080,carre*3); // Bande noir en bas
-  for(i = 0; i < tailleSerpent; i++)
+  for (i = 0 ; i < tailleSerpent; i++) // Initialisation du serpent
     {
-      ChoisirCouleurDessin(CouleurParNom("black"));
-      RemplirRectangle(serpent[i].x*carre,serpent[i].y*carre,carre,carre);
+      serpent[i].x = 30;
+      serpent[i].y = 20;
     }
-  while(1)
-    {
-      AfficherScore(score);
-      AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
-      CreerObstacles(carre,tabObstacle);
-      while(ToucheEnAttente() != 1)
-	    {
+    NettoyerEcran();
+    DessinerGrille(carre);
+    RemplirRectangle(0,NB_PIXEL_Y_JEU,1080,carre*3); // Bande noir en bas
+    for(i = 0; i < tailleSerpent; i++)
+      {
+	ChoisirCouleurDessin(CouleurParNom("black"));
+	RemplirRectangle(serpent[i].x*carre,serpent[i].y*carre,carre,carre);
+      }
+	AfficherScore(score);
+	AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
+	CreerObstacles(carre,tabObstacle);
+	while(ToucheEnAttente() != 1)
+	  {
+	  }
+	while(1)//Boucle principale
+	  {
+	    CreerPomme(carre,tabPomme,tabObstacle);
+	    DessinerGrille(carre);
+	    direction = DirectionSerpent(direction);
+	    if (Microsecondes()>suivant) // Si une seconde est passé
+	      {
+		suivant=Microsecondes()+delta;
+		AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
+		CalculerTemps(&seconde, &seconde2, &minute, &minute2);
+	      }
+	    queue = DeplacerSerpent(carre,direction,serpent,tailleSerpent);
+	    tete = serpent[0];
+	    tailleSerpent = VerifieManger(&score,tete,tabPomme,tailleSerpent);
+	    if(VerifieCollisionSerpent(tete,serpent,tailleSerpent,tabObstacle)){// Touche un mur => GAME OVER
+	      break;
 	    }
-      while(1)//Boucle principale
-	{
-	  CreerPomme(carre,tabPomme,tabObstacle);
-	  direction = DirectionSerpent(direction);
-	  if (Microsecondes()>suivant) // Si une seconde est passé
-	    {
-	      suivant=Microsecondes()+delta;
-	      AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
-	      CalculerTemps(&seconde, &seconde2, &minute, &minute2);
-	    }
-	  queue = DeplacerSerpent(carre,direction,serpent,tailleSerpent);
-	  tete = serpent[0];
-	  tailleSerpent = VerifieManger(&score,tete,tabPomme,tailleSerpent);
-	  if(VerifieCollisionSerpent(tete,serpent,tailleSerpent,tabObstacle)){// Touche un mur => GAME OVER
+	    AfficherSerpent(serpent,tailleSerpent,carre,queue);
+	  }
+	while(ToucheEnAttente() != 1)
+	  { 
+	    ChoisirCouleurDessin(CouleurParNom("red"));
+	    EcrireTexte(340,260,"Vous avez perdu !",2);	
+	    EcrireTexte(120,290,"Appuyez sur n'importe quelle touche pour recommencer",2);
+	    EcrireTexte(260,320,"Appuyez sur Echap pour quitter",2);	
+	  }
+	if(Touche() == XK_Escape)
+	  {
 	    break;
-	    }
-	  AfficherSerpent(serpent,tailleSerpent,carre,queue);
-	}
-      while(1) // Juste une boucle pour afficher que le joueur a perdu
-	{
-	  ChoisirCouleurDessin(CouleurParNom("black"));
-	  EcrireTexte(340,260,"Vous avez perdu !",2);	
-	}
-    }
-  FermerGraphique();
-  return EXIT_SUCCESS;
+	  }
+  }
+    FermerGraphique();
+    return EXIT_SUCCESS;
 }
 #endif /* CONSTANTES.H*/
 #endif /* STRUCTURES.H*/
