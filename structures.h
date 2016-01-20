@@ -10,8 +10,8 @@ typedef struct Serpent Serpent;
 struct Serpent
 
 {
-  int x;
-  int y;
+  int xTete;
+  int yTete;
   int tailleS;
 };
 
