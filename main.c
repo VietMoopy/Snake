@@ -124,11 +124,11 @@ void AfficherSerpent(Coordonnees* serpent, int tailleSerpent, int carre, Coordon
   usleep(80000); // Vitesse du serpent
   ChoisirCouleurDessin(CouleurParNom("white"));
   RemplirRectangle(queue.x*carre,queue.y*carre,carre,carre);
-  ChoisirCouleurDessin(CouleurParNom("green"));
+  ChoisirCouleurDessin(CouleurParComposante(27,94,32)); // Vert fonce
   RemplirRectangle(serpent[0].x*carre,serpent[0].y*carre,carre,carre);
   for(i = 1; i < tailleSerpent; i++)
     {
-      ChoisirCouleurDessin(CouleurParNom("grey"));
+      ChoisirCouleurDessin(CouleurParComposante(102,187,106)); // Vert clair
       RemplirRectangle(serpent[i].x*carre,serpent[i].y*carre,carre,carre);
     }
 }
@@ -206,7 +206,7 @@ void AfficherTemps(char seconde, char seconde2, char minute, char minute2, int c
   tempsTab[1] = minute;
   tempsTab[3] = seconde2;	
   tempsTab[4] = seconde; 
-  RemplirRectangle(0,NB_PIXEL_Y_JEU,400,54);
+  RemplirRectangle(0,NB_PIXEL_Y_JEU,500,54);
   ChoisirCouleurDessin(CouleurParNom("white"));
   EcrireTexte(30,590,tempsTab,2);
 }
@@ -256,7 +256,6 @@ int main() // Fonction principale
   char minute = '0';
   char minute2 = '0';
   int tailleSerpent = 10;
-  int flag[5] = {0};
   Coordonnees serpent[20];
 
   serpent[tailleSerpent].x = -1; // Pour ne pas voir un carre noir qui apparait en haut a droite de la fenetre
@@ -273,6 +272,7 @@ int main() // Fonction principale
     {
       tabPomme[i].x = -1;
       tabPomme[i].y = -1;
+      tabPomme[i].flagP = 0;
     }
   for (i = 0 ; i < tailleSerpent; i++) // Initialisation du serpent
     {
@@ -280,11 +280,11 @@ int main() // Fonction principale
       serpent[i].y = 20;
     }
     NettoyerEcran();
-    DessinerGrille(carre);
+    // DessinerGrille(carre);
     RemplirRectangle(0,NB_PIXEL_Y_JEU,1080,carre*3); // Bande noir en bas
     for(i = 0; i < tailleSerpent; i++)
       {
-	ChoisirCouleurDessin(CouleurParNom("black"));
+	ChoisirCouleurDessin(CouleurParComposante(27,94,32));
 	RemplirRectangle(serpent[i].x*carre,serpent[i].y*carre,carre,carre);
       }
 	AfficherScore(score);
@@ -296,7 +296,7 @@ int main() // Fonction principale
 	while(1)//Boucle principale
 	  {
 	    CreerPomme(carre,tabPomme,tabObstacle);
-	    DessinerGrille(carre);
+	    // DessinerGrille(carre);
 	    direction = DirectionSerpent(direction);
 	    if (Microsecondes()>suivant) // Si une seconde est passé
 	      {
