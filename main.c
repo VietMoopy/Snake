@@ -25,27 +25,6 @@ void DessinerGrille(int carre) // Fonction qui dessine la grille du jeu (60x40)
     }
 }
 
-void CalculerTemps(char* seconde, char* seconde2, char* minute, char* minute2) // Calcule le temps, ajoute 1 à seconde toutes les secondes
-{
-  *seconde = *seconde + 1;
-  if(*seconde == 58) // Si on a 10 secondes, on rajoute 1 au dizaine de seconde
-    {
-      *seconde = '0';
-      *seconde2 = *seconde2 + 1;
-    }
-  if(*seconde2 == 54) // Si on a 60 secondes, on rajoute 1 min
-    {
-      *seconde2 = '0';
-      *minute = *minute + 1;
-    }
-  if(*minute == 58) // Si on a 10 min, on rajoute 1 au dizaine de min
-    {
-      *minute = '0';
-      *minute2 = *minute2 + 1;
-    }
-
-}
-
 int DirectionSerpent(direction) // Permet de determiner dans quelle direction l'utilisateur veut faire diriger le serpent
 {
   int touche = 0;
@@ -121,7 +100,7 @@ Coordonnees DeplacerSerpent(int carre,int direction, Coordonnees* serpent, int t
 
 void AfficherSerpent(Coordonnees* serpent, int tailleSerpent, int carre, Coordonnees queue){
   int i = 0;
-  usleep(80000); // Vitesse du serpent
+  usleep(60000); // Vitesse du serpent
   ChoisirCouleurDessin(CouleurParNom("white"));
   RemplirRectangle(queue.x*carre,queue.y*carre,carre,carre);
   ChoisirCouleurDessin(CouleurParComposante(27,94,32)); // Vert fonce
@@ -134,22 +113,30 @@ void AfficherSerpent(Coordonnees* serpent, int tailleSerpent, int carre, Coordon
 }
 
 
-int CreerPomme(int carre, Pomme* tabPomme, Obstacles* tabObstacle){ // Affiche une pomme au hasard sur la map
-  int i,k;
+int CreerPomme(int carre, Pomme* tabPomme, Obstacles* tabObstacle, int tailleSerpent, Coordonnees* serpent){ // Affiche une pomme au hasard sur la map
+  int i,j,k;
   srand(time(NULL));
   for(i = 0; i < NB_POMME; i++)
     {
       if(tabPomme[i].flagP == 0) // Si il n'y a pas de pomme sur la map
 	{
 	  tabPomme[i].flagP = 1;
-	  for(k = 0; k < NB_OBSTACLE; k++)
-	    {
-	      tabPomme[i].x = (rand() % (MAXGRILLEX - MINGRILLE + 1)) + MINGRILLE;
-	      tabPomme[i].y = (rand() % (MAXGRILLEY - MINGRILLE + 1)) + MINGRILLE;
-	      if((tabPomme[i].x == tabObstacle[k].x && tabPomme[i].y == tabObstacle[k].y) || (tabPomme[i].x == -1 && tabPomme[i].y == -1))
+	  tabPomme[i].x = (rand() % (MAXGRILLEX - MINGRILLE + 1)) + MINGRILLE;
+	  tabPomme[i].y = (rand() % (MAXGRILLEY - MINGRILLE + 1)) + MINGRILLE;
+	  for(k = 0;  k < NB_OBSTACLE; k++)
+	    {		
+	      while(tabPomme[i].x == tabObstacle[k].x && tabPomme[i].y == tabObstacle[k].y)
 		{
 		  tabPomme[i].x = (rand() % (MAXGRILLEX - MINGRILLE + 1)) + MINGRILLE; // Permet d'obtenir une valeur aléatoire entre 0 et 60 sachant que la grille est de 60 par 40
 		  tabPomme[i].y = (rand() % (MAXGRILLEY - MINGRILLE + 1)) + MINGRILLE; // Permet d'obtenir une valeur aléatoire entre 0 et 40
+		  for(j = 1; j < tailleSerpent; j++)
+		    {
+		      if(tabPomme[i].x == serpent[j].x && tabPomme[i].x == serpent[j].y)
+			{
+			  tabPomme[i].x = (rand() % (MAXGRILLEX - MINGRILLE + 1)) + MINGRILLE; // Permet d'obtenir une valeur aléatoire entre 0 et 60 sachant que la grille est de 60 par 40
+			  tabPomme[i].y = (rand() % (MAXGRILLEY - MINGRILLE + 1)) + MINGRILLE; // Permet d'obtenir une valeur aléatoire entre 0 et 40
+			}
+		    }
 		}
 	    }
 	  ChoisirCouleurDessin(CouleurParNom("red"));
@@ -196,19 +183,17 @@ int VerifieManger(int* score,Coordonnees tete,Pomme* tabPomme, int tailleSerpent
   return tailleSerpent;
 }
 
-void AfficherTemps(char seconde, char seconde2, char minute, char minute2, int carre, int* score) // Fonction qui affiche le temps
+void AfficherTemps(int seconde, int minute, int carre, int* score) // Fonction qui affiche le temps
 {
-  char tempsTab[6] = {'0','0',':','0','0','\0'}; // On remplace chaque membre par la valeur du temps qu'on a calculé grace à la fonction précédente
-  int temps = 0;;
-  char min = 0;
+  char tempsTabSec[3] = {};
+  char tempsTabMin[3] = {};
+  sprintf(tempsTabSec,"%02d",seconde);
+  sprintf(tempsTabMin,"%02d: ",minute);
   ChoisirCouleurDessin(CouleurParNom("black"));
-  tempsTab[0] = minute2;
-  tempsTab[1] = minute;
-  tempsTab[3] = seconde2;	
-  tempsTab[4] = seconde; 
   RemplirRectangle(0,NB_PIXEL_Y_JEU,500,54);
   ChoisirCouleurDessin(CouleurParNom("white"));
-  EcrireTexte(30,590,tempsTab,2);
+  EcrireTexte(30,590,tempsTabMin,2);
+  EcrireTexte(67,590,tempsTabSec,2);
 }
 
 int VerifieCollisionSerpent(Coordonnees tete, Coordonnees serpent[], int tailleSerpent, Obstacles* tabObstacle)
@@ -241,14 +226,14 @@ void NettoyerEcran(){
   RemplirRectangle(0,0,NB_PIXEL_X_JEU,NB_PIXEL_Y_JEU);
 }
   
-void InitialiserVariable(int* score, int* direction, char* seconde, char* seconde2, char* minute,char* minute2,int* tailleSerpent){
+void InitialiserVariable(int* score, int* direction,int* tailleSerpent,int* seconde, int* minute, Coordonnees* serpent){
   *score = 0;
   *direction = 0;
-  *seconde = '0';
-  *seconde2 = '0';
-  *minute = '0';
-  *minute2 = '0';
   *tailleSerpent = 10;
+  *seconde = 0;
+  *minute = 0;
+  serpent[0].x = CENTRE_X_GRILLE;
+  serpent[0].y = CENTRE_Y_GRILLE;
 }
   
 
@@ -261,37 +246,32 @@ int main() // Fonction principale
   int etatJeu = 1;
   int score = 0;
   int direction = 0;
-  char seconde = '0';
-  char seconde2 = '0';
-  char minute = '0';
-  char minute2 = '0';
+  int seconde = 0;
+  int minute = 0;
   int tailleSerpent = 10;
   Coordonnees serpent[20];
-
-  serpent[tailleSerpent].x = -1; // Pour ne pas voir un carre noir qui apparait en haut a droite de la fenetre
-  serpent[tailleSerpent].y = -1;
+  serpent[0].x = CENTRE_X_GRILLE;
+  serpent[0].y = CENTRE_Y_GRILLE;
   Coordonnees queue;
   Pomme tabPomme[NB_POMME] = {};
-
   Obstacles tabObstacle[NB_OBSTACLE] = {};
   Coordonnees tete;
   InitialiserGraphique();
   CreerFenetre(10,10,NB_PIXEL_X_FENETRE,NB_PIXEL_Y_FENETRE);
   while(etatJeu){
-    InitialiserVariable(&score,&direction,&seconde,&seconde2,&minute,&minute2,&tailleSerpent);
+    InitialiserVariable(&score,&direction,&tailleSerpent,&seconde,&minute,serpent);
     for (i = 0 ; i < NB_POMME; i++) // Initialisation du serpent
       {
 	tabPomme[i].x = -1;
 	tabPomme[i].y = -1;
 	tabPomme[i].flagP = 0;
       }
-    for (i = 0 ; i < tailleSerpent; i++) // Initialisation du serpent
+    for (i = 1 ; i < TAILLE_MAX_SNAKE; i++) // Initialisation du serpent
       {
-	serpent[i].x = 30;
-	serpent[i].y = 20;
+	serpent[i].x = -1;
+	serpent[i].y = -1;
       }
     NettoyerEcran();
-    // DessinerGrille(carre);
     RemplirRectangle(0,NB_PIXEL_Y_JEU,1080,carre*3); // Bande noir en bas
     for(i = 0; i < tailleSerpent; i++)
       {
@@ -299,25 +279,29 @@ int main() // Fonction principale
 	RemplirRectangle(serpent[i].x*carre,serpent[i].y*carre,carre,carre);
       }
     AfficherScore(score);
-    AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
+    AfficherTemps(seconde,minute,carre,&score);
     CreerObstacles(carre,tabObstacle);
     while(ToucheEnAttente() != 1)
       {
       }
     while(1)//Boucle principale
       {
-	CreerPomme(carre,tabPomme,tabObstacle);
 	// DessinerGrille(carre);
 	direction = DirectionSerpent(direction);
 	if (Microsecondes()>suivant) // Si une seconde est passé
 	  {
 	    suivant=Microsecondes()+delta;
-	    AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
-	    CalculerTemps(&seconde, &seconde2, &minute, &minute2);
+	    seconde++;
+	    if(seconde == 60){
+	      seconde = 0;
+	      minute++;
+	    }
+	    AfficherTemps(seconde,minute,carre,&score);
 	  }
 	queue = DeplacerSerpent(carre,direction,serpent,tailleSerpent);
 	tete = serpent[0];
 	tailleSerpent = VerifieManger(&score,tete,tabPomme,tailleSerpent);
+	CreerPomme(carre,tabPomme,tabObstacle,tailleSerpent,serpent);
 	if(VerifieCollisionSerpent(tete,serpent,tailleSerpent,tabObstacle)){// Touche un mur => GAME OVER
 	  break;
 	}

@@ -5,6 +5,9 @@
 #define NB_PIXEL_Y_JEU 560
 #define NB_POMME 5
 #define NB_OBSTACLE 15
+#define TAILLE_MAX_SNAKE 50
+#define CENTRE_X_GRILLE 30
+#define CENTRE_Y_GRILLE 20
 #define CENTRE_X  540
 #define CENTRE_Y 360
 #define UP 1
