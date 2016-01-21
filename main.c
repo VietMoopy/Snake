@@ -128,7 +128,7 @@ void AfficherSerpent(Coordonnees* serpent, int tailleSerpent, int carre, Coordon
   RemplirRectangle(serpent[0].x*carre,serpent[0].y*carre,carre,carre);
   for(i = 1; i < tailleSerpent; i++)
     {
-      ChoisirCouleurDessin(CouleurParComposante(102,187,106)); // Vert clair
+      ChoisirCouleurDessin(CouleurParNom("green")); // Vert clair
       RemplirRectangle(serpent[i].x*carre,serpent[i].y*carre,carre,carre);
     }
 }
@@ -241,6 +241,16 @@ void NettoyerEcran(){
   RemplirRectangle(0,0,NB_PIXEL_X_JEU,NB_PIXEL_Y_JEU);
 }
   
+void InitialiserVariable(int* score, int* direction, char* seconde, char* seconde2, char* minute,char* minute2,int* tailleSerpent){
+  *score = 0;
+  *direction = 0;
+  *seconde = '0';
+  *seconde2 = '0';
+  *minute = '0';
+  *minute2 = '0';
+  *tailleSerpent = 10;
+}
+  
 
 int main() // Fonction principale
 {
@@ -268,17 +278,18 @@ int main() // Fonction principale
   InitialiserGraphique();
   CreerFenetre(10,10,NB_PIXEL_X_FENETRE,NB_PIXEL_Y_FENETRE);
   while(etatJeu){
-  for (i = 0 ; i < NB_POMME; i++) // Initialisation du serpent
-    {
-      tabPomme[i].x = -1;
-      tabPomme[i].y = -1;
-      tabPomme[i].flagP = 0;
-    }
-  for (i = 0 ; i < tailleSerpent; i++) // Initialisation du serpent
-    {
-      serpent[i].x = 30;
-      serpent[i].y = 20;
-    }
+    InitialiserVariable(&score,&direction,&seconde,&seconde2,&minute,&minute2,&tailleSerpent);
+    for (i = 0 ; i < NB_POMME; i++) // Initialisation du serpent
+      {
+	tabPomme[i].x = -1;
+	tabPomme[i].y = -1;
+	tabPomme[i].flagP = 0;
+      }
+    for (i = 0 ; i < tailleSerpent; i++) // Initialisation du serpent
+      {
+	serpent[i].x = 30;
+	serpent[i].y = 20;
+      }
     NettoyerEcran();
     // DessinerGrille(carre);
     RemplirRectangle(0,NB_PIXEL_Y_JEU,1080,carre*3); // Bande noir en bas
@@ -287,45 +298,45 @@ int main() // Fonction principale
 	ChoisirCouleurDessin(CouleurParComposante(27,94,32));
 	RemplirRectangle(serpent[i].x*carre,serpent[i].y*carre,carre,carre);
       }
-	AfficherScore(score);
-	AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
-	CreerObstacles(carre,tabObstacle);
-	while(ToucheEnAttente() != 1)
+    AfficherScore(score);
+    AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
+    CreerObstacles(carre,tabObstacle);
+    while(ToucheEnAttente() != 1)
+      {
+      }
+    while(1)//Boucle principale
+      {
+	CreerPomme(carre,tabPomme,tabObstacle);
+	// DessinerGrille(carre);
+	direction = DirectionSerpent(direction);
+	if (Microsecondes()>suivant) // Si une seconde est passé
 	  {
+	    suivant=Microsecondes()+delta;
+	    AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
+	    CalculerTemps(&seconde, &seconde2, &minute, &minute2);
 	  }
-	while(1)//Boucle principale
-	  {
-	    CreerPomme(carre,tabPomme,tabObstacle);
-	    // DessinerGrille(carre);
-	    direction = DirectionSerpent(direction);
-	    if (Microsecondes()>suivant) // Si une seconde est passé
-	      {
-		suivant=Microsecondes()+delta;
-		AfficherTemps(seconde,seconde2,minute,minute2,carre, &score);
-		CalculerTemps(&seconde, &seconde2, &minute, &minute2);
-	      }
-	    queue = DeplacerSerpent(carre,direction,serpent,tailleSerpent);
-	    tete = serpent[0];
-	    tailleSerpent = VerifieManger(&score,tete,tabPomme,tailleSerpent);
-	    if(VerifieCollisionSerpent(tete,serpent,tailleSerpent,tabObstacle)){// Touche un mur => GAME OVER
-	      break;
-	    }
-	    AfficherSerpent(serpent,tailleSerpent,carre,queue);
-	  }
-	while(ToucheEnAttente() != 1)
-	  { 
-	    ChoisirCouleurDessin(CouleurParNom("red"));
-	    EcrireTexte(340,260,"Vous avez perdu !",2);	
-	    EcrireTexte(120,290,"Appuyez sur n'importe quelle touche pour recommencer",2);
-	    EcrireTexte(260,320,"Appuyez sur Echap pour quitter",2);	
-	  }
-	if(Touche() == XK_Escape)
-	  {
-	    break;
-	  }
+	queue = DeplacerSerpent(carre,direction,serpent,tailleSerpent);
+	tete = serpent[0];
+	tailleSerpent = VerifieManger(&score,tete,tabPomme,tailleSerpent);
+	if(VerifieCollisionSerpent(tete,serpent,tailleSerpent,tabObstacle)){// Touche un mur => GAME OVER
+	  break;
+	}
+	AfficherSerpent(serpent,tailleSerpent,carre,queue);
+      }
+    while(ToucheEnAttente() != 1)
+      { 
+	ChoisirCouleurDessin(CouleurParNom("red"));
+	EcrireTexte(340,260,"Vous avez perdu !",2);	
+	EcrireTexte(120,290,"Appuyez sur n'importe quelle touche pour recommencer",2);
+	EcrireTexte(260,320,"Appuyez sur Echap pour quitter",2);	
+      }
+    if(Touche() == XK_Escape)
+      {
+	break;
+      }
   }
-    FermerGraphique();
-    return EXIT_SUCCESS;
+  FermerGraphique();
+  return EXIT_SUCCESS;
 }
 #endif /* CONSTANTES.H*/
 #endif /* STRUCTURES.H*/
