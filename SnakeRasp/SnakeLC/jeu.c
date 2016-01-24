@@ -25,20 +25,20 @@ Serpent* CreerSerpentVide(){
 }
 
 void AjouterElt(Serpent* serpent, Coordonnees element){
-EltSerpent* p = (EltSerpent*) malloc(sizeof(EltSerpent));
- if(serpent->tete != NULL){
-   p->element = element;
-   p->suivant = serpent->tete;
-   p->precedent = NULL;
-   serpent->tete->precedent = p;
-   serpent->tete = p;
- }
- if(serpent->tete == NULL){
-   p->element = element;
-   p->suivant = NULL;
-   p->precedent = NULL;
-   serpent->tete = p;
- }
+  EltSerpent* p = (EltSerpent*) malloc(sizeof(EltSerpent));
+  if(serpent->tete != NULL){
+    p->element = element;
+    p->suivant = serpent->tete;
+    p->precedent = NULL;
+    serpent->tete->precedent = p;
+    serpent->tete = p;
+  }
+  if(serpent->tete == NULL){
+    p->element = element;
+    p->suivant = NULL;
+    p->precedent = NULL;
+    serpent->tete = p;
+  }
 }
 
 void Afficher(Serpent* serpent){
@@ -85,7 +85,7 @@ Coordonnees DeplacerSerpentLC(int carre,int direction, Serpent* serpent, int* co
 
 void AfficherSerpentLC(Serpent* serpent, int carre, Coordonnees queue){
   EltSerpent* s;
-  usleep(60000); // Vitesse du serpent
+  usleep(VITESSE_SERPENT); // Vitesse du serpent
   ChoisirCouleurDessin(CouleurParNom("white"));
   RemplirRectangle(queue.x*carre,queue.y*carre,carre,carre);
   for(s = serpent->tete; s ->suivant!= NULL; s = s->suivant)
@@ -97,7 +97,7 @@ void AfficherSerpentLC(Serpent* serpent, int carre, Coordonnees queue){
   RemplirRectangle(s->element.x*carre,s->element.y*carre,carre,carre);
 }
 
-int DirectionSerpent(int direction) // Permet de determiner dans quelle direction l'utilisateur veut faire diriger le serpent
+int DirectionSerpent(int direction,int* etatJeu, int* etatPartie) // Permet de determiner dans quelle direction l'utilisateur veut faire diriger le serpent
 {
   int touche = 0;
   if(ToucheEnAttente()) // Si le joueur a presser une touche 
@@ -121,29 +121,36 @@ int DirectionSerpent(int direction) // Permet de determiner dans quelle directio
 	}
       if(touche == XK_space)
 	{
-	  MettrePause();
+	  MettrePause(etatJeu,etatPartie);
 	}
       if(touche == XK_Escape) // Pour quitter le jeu
 	{
-	  FermerGraphique();
+	  QuitterPartie(etatJeu,etatPartie);
 	}
     } // Dans le cas où le joueur n'a rien pressé, on renvoit la même valeur que celle donnée en argument
   return direction;
 }
 
-int MettrePause(){
+int MettrePause(int* etatJeu, int* etatPartie){
   int touche = 0;
   while(ToucheEnAttente() != 1 && touche != XK_space)
     {
       touche = Touche();
       if(touche == XK_Escape) // Pour quitter le jeu
 	{
-	  FermerGraphique();
+	  QuitterPartie(etatJeu,etatPartie);
+	  break;
 	}
     }
 }
 
-int CreerPomme(int carre, Pomme* tabPomme, Obstacles* tabObstacle){ // Affiche une pomme au hasard sur la map
+void QuitterPartie(int* etatJeu, int *etatPartie){
+  *etatJeu = 0;
+  *etatPartie = 0;
+}
+  
+
+int CreerPomme(int carre, Pomme* tabPomme, Obstacle* tabObstacle){ // Affiche une pomme au hasard sur la map
   int i,j,k;
   for(i = 0; i < NB_POMME; i++)
     {
@@ -159,15 +166,15 @@ int CreerPomme(int carre, Pomme* tabPomme, Obstacles* tabObstacle){ // Affiche u
 		  tabPomme[i].x = (rand() % (MAXGRILLEX - MINGRILLE + 1)) + MINGRILLE; // Permet d'obtenir une valeur aléatoire entre 0 et 60 sachant que la grille est de 60 par 40
 		  tabPomme[i].y = (rand() % (MAXGRILLEY - MINGRILLE + 1)) + MINGRILLE; // Permet d'obtenir une valeur aléatoire entre 0 et 40
 		}
-      ChoisirCouleurDessin(CouleurParNom("red"));
-      RemplirRectangle(tabPomme[i].x*carre,tabPomme[i].y*carre,carre,carre);
 	    }
 	}
+      ChoisirCouleurDessin(CouleurParNom("red"));
+      RemplirRectangle(tabPomme[i].x*carre,tabPomme[i].y*carre,carre,carre);
     }
 }
 
 
-void CreerObstacles(int carre, Obstacles* tabObstacle){ // Affiche une pomme au hasard sur la map
+void CreerObstacles(int carre, Obstacle* tabObstacle){ // Affiche une pomme au hasard sur la map
   int i;
   for(i = 0; i < NB_OBSTACLE; i++)
     {
@@ -198,28 +205,26 @@ void VerifieManger(Serpent* serpent,int* score,Pomme* tabPomme,int carre)
     }
 }
 
-
-
-int VerifieCollisionSerpent(Serpent* serpent, Obstacles* tabObstacle)
+int VerifieCollisionSerpent(Serpent* serpent, Obstacle* tabObstacle)
 {
   EltSerpent* s;
-  Coordonnees tete;
+  Coordonnees teteS;
   int i;
   for(s = serpent->tete; s->suivant != NULL; s = s->suivant);
-  tete = s->element;
+  teteS = s->element;
   for(s = serpent->tete; s ->suivant!= NULL; s = s->suivant){
-      if (s->element.x == tete.x && s->element.y == tete.y)
-	{
-	   return 1;
-	}
-    }
-  if(tete.x < 0 || tete.x >= 60 || tete.y < 0 || tete.y >= 40 )
+    if (s->element.x == teteS.x && s->element.y == teteS.y)
+      {
+	return 1;
+      }
+  }
+  if(teteS.x < 0 || teteS.x >= 60 || teteS.y < 0 || teteS.y >= 40 )
     {
       return 1;
     }
   for(i = 0; i < NB_OBSTACLE; i++)
     {
-      if (tete.x == tabObstacle[i].x && tete.y == tabObstacle[i].y)
+      if (teteS.x == tabObstacle[i].x && teteS.y == tabObstacle[i].y)
 	{
 	  return 1;
 	}
@@ -229,16 +234,15 @@ int VerifieCollisionSerpent(Serpent* serpent, Obstacles* tabObstacle)
 
 void DetruireSerpent(Serpent* serpent){
   EltSerpent* s;
-    for(s = serpent->tete;s != NULL; s = s->suivant){
-      s = serpent->tete;
-      serpent->tete = serpent->tete->suivant;
-      free(s);
-      Afficher(serpent);
-    }
-    free(serpent->tete);
+  for(s = serpent->tete;s != NULL; s = s->suivant){
+    s = serpent->tete;
+    serpent->tete = serpent->tete->suivant;
+    free(s);
+  }
+  free(serpent->tete);
 }
 
-void InitialiserVariable(int* score, int* direction,int* seconde, int* minute,Serpent* serpent, int* compteur){
+void InitialiserVariable(int* score, int* direction,int* seconde, int* minute,Serpent* serpent, int* compteur, Pomme* tabPomme){
   int i;
   serpent->tailleSerpent = TAILLE_INITIAL_SERPENT;
   Coordonnees centre = {CENTRE_X_GRILLE,CENTRE_Y_GRILLE};
@@ -252,6 +256,29 @@ void InitialiserVariable(int* score, int* direction,int* seconde, int* minute,Se
   *seconde = 0;
   *minute = 0;
   *compteur = 0;
+  for (i = 0 ; i < NB_POMME; i++) // Initialisation du serpent
+    {
+      tabPomme[i].x = -1;
+      tabPomme[i].y = -1;
+      tabPomme[i].flagP = 0;
+    }
+}
+
+void CreerNouvellePartie(int* carre,int* score,int* seconde,int* minute,Obstacle* tabObstacle){
+  NettoyerEcran();
+  RemplirRectangle(0,NB_PIXEL_Y_JEU,1080,(*carre)*3); // Bande noir en bas
+  ChoisirCouleurDessin(CouleurParComposante(27,94,32));
+  RemplirRectangle(CENTRE_X_GRILLE*(*carre),CENTRE_Y_GRILLE*(*carre),*carre,*carre); // Affiche un carre vert au centre de la map
+  AfficherScore(*score);
+  AfficherTemps(*seconde,*minute,*carre);
+  CreerObstacles(*carre,tabObstacle);
+}
+
+void AfficherGameOver(){
+  ChoisirCouleurDessin(CouleurParNom("red"));
+  EcrireTexte(340,260,"Vous avez perdu !",2);	
+  EcrireTexte(120,290,"Appuyez sur n'importe quelle touche pour recommencer",2);
+  EcrireTexte(260,320,"Appuyez sur Echap pour quitter",2);
 }
 
 #endif /* CONSTANTES.H*/

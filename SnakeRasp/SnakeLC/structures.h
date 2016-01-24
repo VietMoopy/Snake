@@ -33,8 +33,8 @@ struct Pomme
   int flagP;
 };
 
-typedef struct Obstacles Obstacles;
-struct Obstacles
+typedef struct Obstacle Obstacle;
+struct Obstacle
 
 {
   int x;

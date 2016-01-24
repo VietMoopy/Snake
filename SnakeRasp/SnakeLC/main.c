@@ -23,48 +23,34 @@ int main() // Fonction principale
   int carre = NB_PIXEL_X_JEU/60;
   unsigned long suivant;
   suivant= Microsecondes()+delta;
-  int i = 0;
   int etatJeu = 1;
-  int score = 0;
-  int direction = 0;
-  int seconde = 0;
-  int minute = 0;
-  int compteur = 0;
+  int etatPartie = 1;
+  int score,direction,seconde,minute,compteur,i;
   Coordonnees queue;
-  
   Serpent* serpent = CreerSerpentVide();
   Pomme tabPomme[NB_POMME] = {};
-  Obstacles tabObstacle[NB_OBSTACLE] = {};
+  Obstacle tabObstacle[NB_OBSTACLE] = {};
+  FILE* fichier = NULL;
+  fichier = fopen("scoreboard.txt", "w");
+  char nom[50];
+  printf("Entrez votre pseudo : ");
+  fgets(nom, 50, stdin);
   InitialiserGraphique();
   CreerFenetre(250,100,NB_PIXEL_X_FENETRE,NB_PIXEL_Y_FENETRE);
+
   while(etatJeu){
-    InitialiserVariable(&score,&direction,&seconde,&minute,serpent,&compteur);
-    Afficher(serpent);
-    for (i = 0 ; i < NB_POMME; i++) // Initialisation du serpent
+    InitialiserVariable(&score,&direction,&seconde,&minute,serpent,&compteur,tabPomme);
+    CreerNouvellePartie(&carre,&score,&seconde,&minute,tabObstacle);
+    while(direction == 0){
+      direction = DirectionSerpent(direction,&etatJeu,&etatPartie);
+	}
+    while(etatPartie)//Boucle principale
       {
-	tabPomme[i].x = -1;
-	tabPomme[i].y = -1;
-	tabPomme[i].flagP = 0;
-      }
-    NettoyerEcran();
-    RemplirRectangle(0,NB_PIXEL_Y_JEU,1080,carre*3); // Bande noir en bas
-    ChoisirCouleurDessin(CouleurParComposante(27,94,32));
-    RemplirRectangle(CENTRE_X_GRILLE*carre,CENTRE_Y_GRILLE*carre,carre,carre); // Affiche un carre vert
-    AfficherScore(score);
-    AfficherTemps(seconde,minute,carre);
-    CreerObstacles(carre,tabObstacle);
-    while(ToucheEnAttente() != 1)
-      {
-      }
-    while(1)//Boucle principale
-      {
-	//DessinerGrille(carre);
-	//AfficherScore(score);
+	direction = DirectionSerpent(direction,&etatJeu,&etatPartie);
 	queue = DeplacerSerpentLC(carre,direction,serpent,&compteur);
 	if(compteur < 2 && direction != 0){
 	compteur++;
 	}
-	direction = DirectionSerpent(direction);
 	if (Microsecondes()>suivant) // Si une seconde est passé
 	  {
 	    suivant=Microsecondes()+delta;
@@ -83,14 +69,19 @@ int main() // Fonction principale
 	  }
 	AfficherSerpentLC(serpent,carre,queue);
       }
-    while(ToucheEnAttente() != 1)
+    while(ToucheEnAttente() != 1 && etatJeu == 1)
       { 
-	ChoisirCouleurDessin(CouleurParNom("red"));
-	EcrireTexte(340,260,"Vous avez perdu !",2);	
-	EcrireTexte(120,290,"Appuyez sur n'importe quelle touche pour recommencer",2);
-	EcrireTexte(260,320,"Appuyez sur Echap pour quitter",2);	
+	fprintf(fichier,"%s Temps %02d:%02d   Score : %07d\n\n",nom,minute,seconde,score);
+	AfficherGameOver();
+	if(Touche() == XK_Escape){
+	  QuitterPartie(&etatJeu,&etatPartie);
+	}
+	else{
+	  break;
+	}
       }
   }
+  fclose(fichier);
   FermerGraphique();
   return EXIT_SUCCESS;
 }
