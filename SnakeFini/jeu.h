@@ -1,0 +1,15 @@
+int DirectionSerpent(int direction,int* etatJeu, int* etatPartie);
+int MettrePause(int* etatJeu, int* etatPartie);
+int CreerPomme(int carre, Pomme* tabPomme, Obstacle* tabObstacle);
+void CreerObstacles(int carre, Obstacle* tabObstacle);
+void VerifieManger(Serpent* serpent,int* score,Pomme* tabPomme,int carre);
+Serpent* CreerSerpentVide();
+void AjouterElt(Serpent* serpent, Coordonnees element);
+Coordonnees DeplacerSerpentLC(int carre,int direction, Serpent* serpent, int* compteur);
+void Afficher(Serpent* serpent);
+void AfficherSerpentLC(Serpent* serpent, int carre, Coordonnees queue);
+int VerifieCollisionSerpent(Serpent* serpent, Obstacle* tabObstacle);
+void InitialiserVariable(int* score, int* direction,int* seconde, int* minute,Serpent* serpent, int* compteur, Pomme* tabPomme, int* etatPartie);
+void DetruireSerpent(Serpent* serpent);
+void CreerNouvellePartie(int* carre,int* score,int* seconde,int* minute,Obstacle* tabObstacle);
+void QuitterPartie(int* etatJeu, int *etatPartie);
