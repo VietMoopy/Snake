@@ -69,9 +69,9 @@ int main() // Fonction principale
 	CreerPomme(carre,tabPomme,tabObstacle);
 	AfficherSerpentLC(serpent,carre,queue);
       }
-    fprintf(fichier,"%s Temps %02d:%02d   Score : %07d\n\n",nom,minute,seconde,score); // On ecrit son score,temps et nom dans le fichier
     while(ToucheEnAttente() != 1 && etatJeu == 1) // Tant que le joueur n'a rien appuyé que l'etatJeu est égale 1 (c-a-d que le joueur n'a pas appuyé Echap)
       { 
+    	fprintf(fichier,"%s Temps %02d:%02d   Score : %07d\n\n",nom,minute,seconde,score); // On ecrit son score,temps et nom dans le fichier	
 	AfficherGameOver(); // On affiche le GameOver
 	if(Touche() == XK_Escape){ // Si le joueur appuie Echap, le jeu se quitte
 	  QuitterPartie(&etatJeu,&etatPartie); 
